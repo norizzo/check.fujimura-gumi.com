@@ -1,0 +1,176 @@
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC
+SQL: 
+    SELECT 
+        i.date,
+        ir.item_id,
+        ir.result_value,
+        im.item_name,
+        c.checker_name AS inspector_name,
+        i.comments
+    FROM inspections i
+    JOIN inspection_result ir ON i.id = ir.inspection_id
+    JOIN inspection_items im ON ir.item_id = im.item_id
+    JOIN checker_master c ON i.checker_id = c.checker_id
+    WHERE i.genba_id = ?
+      AND i.inspection_type_id = ?
+      AND i.date BETWEEN ? AND ?
+    ORDER BY i.date ASC, ir.item_id ASC

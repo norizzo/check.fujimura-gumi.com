@@ -1,0 +1,18 @@
+.label {
+    font-size: 20px;
+}
+.form-text{
+    font-size: 20px;
+    text-align: right;
+    width: 70px;
+}
+.form-button{
+    font-size: 20px;
+    
+}
+img {
+    max-width: 600px;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+}

@@ -1,0 +1,50 @@
+# --- URLリライト設定（mod_rewrite を有効化）---
+RewriteEngine On
+
+# PHPファイルの拡張子を省略（example.com/index.php → example.com/index）
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^/]+)/?$ $1.php [L]
+
+# index.php へリダイレクト（ルートアクセス時）
+DirectoryIndex index.php
+
+
+# --- エラーページのカスタマイズ ---
+ErrorDocument 404 /custom_404.php
+ErrorDocument 403 /custom_403.php
+ErrorDocument 500 /custom_500.php
+
+
+# --- キャッシュ設定（ブラウザキャッシュを有効化）---
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access plus 1 hour"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+</IfModule>
+
+
+# --- 圧縮（Gzip圧縮を有効化）---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+</IfModule>
+
+
+# --- セキュリティ対策 ---
+# 1. .htaccess や .env などの機密ファイルへのアクセスを禁止
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# 2. サーバーのディレクトリリスト表示を無効化
+Options -Indexes
+
+# 3. 特定のファイル（例：config.php など）へのアクセスを禁止
+<Files "config.php">
+    Require all denied
+</Files>
+
+

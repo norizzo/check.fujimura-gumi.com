@@ -1,0 +1,150 @@
+
+        .btn-category {
+            margin-bottom: 5px;
+            max-width: 500px;
+            width: auto;
+        }
+
+        .btn-inspected {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            cursor: not-allowed !important;
+        }
+
+        .btn-historical {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        .btn-new {
+            background-color: #7eb1ff !important;
+            border-color: #7eb1ff !important;
+            color: white !important;
+        }
+
+        .category-group {
+            display: none;
+        }
+
+        .category-group.visible {
+            display: block;
+        }
+    
+        button {
+            display: block;
+        }
+
+        .inspection-form {
+            display: none;
+        }
+
+        
+        /* Add this style to fix footer issue */
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1; /* コンテンツが少なくても最小高さを確保 */
+            /* overflow:auto; */
+            display: flex;
+            flex-direction: column;
+            /* min-height: 100vh; */
+        }
+        footer {
+            
+            padding: 10px;
+            position: relative;
+            width: 100%;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        th {
+            white-space: nowrap;
+            font-size: 10px;
+            padding-left: 0.rem;
+            padding-right: 0.rem;
+            text-align: center !important;
+            vertical-align: middle;
+            line-height: 1.2; /* 文字サイズに合わせて行の高さを調整 */
+            padding-top: 0.3rem; /* 上下のパディングを少し大きく */
+            padding-bottom: 0.3rem;
+        }
+
+        td {
+            white-space: nowrap;
+            font-size: 12px;
+            padding-left: 0.rem;
+            padding-right: 0.rem;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1.1; /* 文字サイズに合わせて行の高さを調整 */
+            padding-top: 0.1rem; /* 上下のパディングを少し大きく */
+            padding-bottom: 0.1rem;
+        }
+
+        /* 先頭カラムを固定する */
+        .table-responsive thead th:first-child,
+        .table-responsive tbody td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa;
+            /* テーブル背景色を設定 */
+            z-index: 2;
+            /* 他のカラムの上に表示 */
+        }
+        
+        .bg-lightblue {
+            background-color: #d9f2ff !important;
+            /* 薄い青 */
+        }
+
+        .bg-lightred {
+            background-color: #ffe6e6 !important;
+            /* 薄い赤 */
+        }
+
+        .saturday-column {
+            background-color: #d9f2ff !important;
+            /* 薄い青 */
+        }
+
+        .sunday-column {
+            background-color: #ffe6e6 !important;
+            /* 薄い赤 */
+        }
+        #genbaSelect {
+            color: red;
+        }
+
+    
+        @media (max-width: 768px) {
+            /* スマホ向けの全画面表示スタイル */
+            .modal-dialog {
+                max-width: 100%; /* モーダル幅を100% */
+                margin: 0; /* 中央揃えのマージンを解除 */
+            }
+        
+            .modal-content {
+                height: 100vh; /* モーダルの高さを画面全体に設定 */
+                border-radius: 0; /* 角丸を解除してフルスクリーンらしい見た目に */
+            }
+        
+            .modal-body {
+                height: calc(100vh - 56px - 56px); /* 上下のヘッダー・フッターを差し引いて高さ調整 */
+                overflow-y: auto; /* 内容が画面を超える場合はスクロール可能に */
+            }
+        
+            .modal-header, 
+            .modal-footer {
+                height: 56px; /* ヘッダーとフッターの固定高さ */
+            }
+        }
