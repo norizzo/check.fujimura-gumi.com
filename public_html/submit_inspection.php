@@ -4,8 +4,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 // 必要なファイルの読み込み
-require_once 'config.php';
-require_once 'functions.php';
+require_once dirname(__DIR__) . '/private/config.php';
+require_once dirname(__DIR__) .  '/private/functions.php';
 
 // データベース接続
 $conn = connectDB();
@@ -16,9 +16,10 @@ $genba_id = $_POST['genba_id'] ?? null;
 $checker_id = $_POST['checker_id'] ?? null;
 $inspection_type_id = $_POST['inspection_type_id'] ?? null;
 $inspection_item_name = $_POST['inspection_item_name'] ?? null;
+$target_name_id = isset($_POST['target_name_id']) ? intval($_POST['target_name_id']) : null;  // target_name_id追加
 $requestSource = $_POST['source'] ?? null;
 $comments = $_POST['comments'] ?? '';
-$inspection_item_name = htmlspecialchars($inspection_item_name, ENT_QUOTES, 'UTF-8');
+$inspection_item_name = empty($inspection_item_name) ? '' : htmlspecialchars($inspection_item_name, ENT_QUOTES, 'UTF-8');
 $inspection_item_name = str_replace(["\r", "\n"], '', $inspection_item_name); // 改行を削除
 
 
@@ -161,6 +162,27 @@ try {
             $updateStmt->close();
         } else {
             throw new Exception("ファイルのアップロードに失敗しました。");
+        }
+    }
+
+    // smart_assignmentsの点検完了フラグを更新
+    if ($target_name_id && $genba_id && $date) {
+        $updateAssignmentSql = "UPDATE smart_assignments
+                                SET inspection_completed = 1, updated_at = NOW()
+                                WHERE assignment_date = ?
+                                AND genba_id = ?
+                                AND target_name_id = ?";
+        $updateAssignmentStmt = $conn->prepare($updateAssignmentSql);
+        $updateAssignmentStmt->bind_param("sii", $date, $genba_id, $target_name_id);
+        $updateAssignmentStmt->execute();
+        $affected_rows = $updateAssignmentStmt->affected_rows;
+        $updateAssignmentStmt->close();
+
+        // 警告ログ: smart_assignmentsに該当レコードがない場合
+        if ($affected_rows === 0) {
+            error_log("警告: smart_assignmentsにレコードが見つかりません。date={$date}, genba_id={$genba_id}, target_name_id={$target_name_id}");
+        } else {
+            error_log("smart_assignments更新成功: date={$date}, genba_id={$genba_id}, target_name_id={$target_name_id}, affected_rows={$affected_rows}");
         }
     }
 

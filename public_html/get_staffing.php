@@ -23,25 +23,27 @@ $selected_genba_id = isset($_GET['genba_id']) ? intval($_GET['genba_id']) : null
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
 
-// 点検済みデータ取得（選択された日付のデータ）
+// 点検済みデータ取得（smart_assignmentsから取得）
 $inspectedSql = "
-    SELECT genba_id, inspection_item_name
-    FROM inspections
-    WHERE date = ? AND inspection_type_id = ?
+    SELECT assignment_id, genba_id, target_name_id
+    FROM smart_assignments
+    WHERE assignment_date = ?
+    AND inspection_completed = 1
 ";
 $stmt = $conn->prepare($inspectedSql);
-$stmt->bind_param('si', $date, $inspection_type_id);
+$stmt->bind_param('s', $date);
 $stmt->execute();
 $inspectedResult = $stmt->get_result();
 
 $inspectedItems = [];
 while ($row = $inspectedResult->fetch_assoc()) {
-    $key = $row['genba_id'] . '-' . $row['inspection_item_name'];
-    $inspectedItems[$key] = true; // inspection_id を格納
+    // target_name_idベースのキーで点検完了を管理
+    $key = $row['genba_id'] . '-' . $row['target_name_id'];
+    $inspectedItems[$key] = true;
 }
 $stmt->close();
 // inspectedItemsの中身をコンソールに出力
-// echo "<script>console.log('inspectedItems:', " . json_encode($inspectedItems) . ");</script>";
+echo "<script>console.log('inspectedItems (smart_assignments):', " . json_encode($inspectedItems) . ");</script>";
 
 // smart_assignmentsから選択された日付の重機配置データを取得
 $filteredData = getAssignmentsForInspection($conn, $date);
@@ -222,15 +224,19 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
 
             const genbaData = data[selectedGenbaId];
             if (genbaData && genbaData.machines) {
-                genbaData.machines.forEach(item => {
+                genbaData.machines.forEach(machineObj => {
                     // 選択された現場の点検項目データ配列をループ処理
+                    const item = machineObj.name;  // 重機名
+                    const targetNameId = machineObj.target_name_id;  // target_name_id
+
                     const button = document.createElement('button');
                     // ボタン要素を生成
-                    let itemKey = `${selectedOption.value}-${item}`;
-                    // itemKeyを生成 (genba_id-item名 の形式)
+                    let itemKey = `${selectedOption.value}-${targetNameId}`;
+                    // itemKeyを生成 (genba_id-target_name_id の形式に変更)
 
                     let inspectionTypeIdForButton = (item === 'コンバインドローラー') ? 10 : 18; // Determine inspection_type_id
                     button.dataset.inspectionTypeId = inspectionTypeIdForButton; // Set data attribute
+                    button.dataset.targetNameId = targetNameId; // target_name_idも保存
 
 
                     button.className = 'btn m-1';
@@ -240,6 +246,7 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
                     button.type = 'button';
                     // ボタンのタイプをbuttonに設定
                     const isInspected = inspectedItems[itemKey] !== undefined;
+                    // target_name_idベースで点検済みチェック
                     // inspectedItemsオブジェクトにitemKeyが存在するか確認 (点検済みかどうかを判定)
 
                     // デバッグ用コード
@@ -277,6 +284,7 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
                             event.preventDefault();
                             const buttonElement = event.target; // Get the clicked button element
                             const inspectionTypeIdFromButton = buttonElement.dataset.inspectionTypeId; // Retrieve data attribute
+                            const targetNameIdFromButton = buttonElement.dataset.targetNameId; // target_name_idも取得
                             // デフォルトのイベント動作をキャンセル
                             const currentDate = new Date().toISOString().split('T')[0];
                             // 今日の日付をYYYY-MM-DD形式で取得
@@ -308,15 +316,15 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
                                         // アラートメッセージを表示
                                     } else {
                                         // APIレスポンスで点検データが存在しない場合
-                                        displayInspectionForm(item, inspectionTypeIdFromButton);
-                                        // 点検フォームを表示する関数を呼び出す
+                                        displayInspectionForm(item, inspectionTypeIdFromButton, targetNameIdFromButton);
+                                        // 点検フォームを表示する関数を呼び出す（target_name_idも渡す）
                                     }
                                 })
                                 .catch(error => {
                                     // APIエラー時の処理
                                     // console.error('API Error:', error);
                                     // APIエラーをコンソールに出力
-                                    displayInspectionForm(item, inspectionTypeIdFromButton);
+                                    displayInspectionForm(item, inspectionTypeIdFromButton, targetNameIdFromButton);
                                     // エラー時も点検フォームを表示する関数を呼び出す (エラー発生時でもフォームを表示させるため？)
                                 });
                         });
@@ -347,7 +355,7 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
             return tempElement.innerHTML;
         }
 
-        async function displayInspectionForm(itemName, inspectionTypeIdFromButton) {
+        async function displayInspectionForm(itemName, inspectionTypeIdFromButton, targetNameId = null) {
             // console.log('displayInspectionForm called with itemName:', itemName, 'inspectionTypeIdFromButton:', inspectionTypeIdFromButton);
 
             const formContainer = document.getElementById('inspectionItems');
@@ -396,6 +404,7 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
                     </select>
                 </div>
                 <input type="hidden" name="inspection_type_id" value="${inspectionTypeIdFromButton}">
+                ${targetNameId ? `<input type="hidden" name="target_name_id" value="${targetNameId}">` : ''}
                 <div class="col-md-4 mb-2">
                     ${itemsHTML}
                 </div>

@@ -117,6 +117,7 @@ function getAssignmentsForInspection($conn, $date = null) {
     while ($row = $result->fetch_assoc()) {
         $genbaId = $row['genba_id'];
         $machineName = mb_convert_kana(str_replace([" ", "\n", "\r", "\t"], "", $row['machine_name']), "KV", "UTF-8");
+        $targetNameId = $row['target_name_id'];
 
         // genba_idをキーとして使用
         if (!isset($filteredData[$genbaId])) {
@@ -125,9 +126,13 @@ function getAssignmentsForInspection($conn, $date = null) {
                 'machines' => []
             ];
         }
-        $filteredData[$genbaId]['machines'][] = $machineName;
+        // 重機名とtarget_name_idを両方保存
+        $filteredData[$genbaId]['machines'][] = [
+            'name' => $machineName,
+            'target_name_id' => $targetNameId
+        ];
 
-        error_log("  genba_id={$genbaId}, genba_name={$row['genba_name']}, machine={$machineName}");
+        error_log("  genba_id={$genbaId}, genba_name={$row['genba_name']}, machine={$machineName}, target_name_id={$targetNameId}");
     }
     $stmt->close();
 
