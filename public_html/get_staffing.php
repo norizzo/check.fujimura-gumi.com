@@ -43,7 +43,7 @@ while ($row = $inspectedResult->fetch_assoc()) {
 }
 $stmt->close();
 // inspectedItemsの中身をコンソールに出力
-echo "<script>console.log('inspectedItems (smart_assignments):', " . json_encode($inspectedItems) . ");</script>";
+// echo "<script>console.log('inspectedItems (smart_assignments):', " . json_encode($inspectedItems) . ");</script>";
 
 // smart_assignmentsから選択された日付の重機配置データを取得
 $filteredData = getAssignmentsForInspection($conn, $date);
@@ -88,11 +88,11 @@ if (!$itemsResult) {
 }
 
 // $filteredDataの中身をコンソールに出力（デバッグ用）
-echo "<script>console.log('=== デバッグ情報 ===');</script>";
-echo "<script>console.log('選択された日付: " . $date . "');</script>";
-echo "<script>console.log('filteredData（smart_assignmentsから取得）:', " . json_encode($filteredData, JSON_UNESCAPED_UNICODE) . ");</script>";
-echo "<script>console.log('filteredDataのキー（genba_id）一覧:', " . json_encode(array_keys($filteredData), JSON_UNESCAPED_UNICODE) . ");</script>";
-echo "<script>console.log('genba_masterから取得される現場は以下でチェック↓');</script>";
+// echo "<script>console.log('=== デバッグ情報 ===');</script>";
+// echo "<script>console.log('選択された日付: " . $date . "');</script>";
+// echo "<script>console.log('filteredData（smart_assignmentsから取得）:', " . json_encode($filteredData, JSON_UNESCAPED_UNICODE) . ");</script>";
+// echo "<script>console.log('filteredDataのキー（genba_id）一覧:', " . json_encode(array_keys($filteredData), JSON_UNESCAPED_UNICODE) . ");</script>";
+// echo "<script>console.log('genba_masterから取得される現場は以下でチェック↓');</script>";
 
 ?>
 
@@ -107,6 +107,7 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
     <meta name="robots" content="index, follow">
     <title>重機等点検入力画面</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../css/inspection.css">
 
 </head>
@@ -153,11 +154,11 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
                                     $exists = isset($filteredData[$genbaId]);
 
                                     // デバッグ出力を追加
-                                    echo "<script>console.log('genba_id={$genbaId}, 現場: " . addslashes($row['genba_name']) . " → 存在: " . ($exists ? 'true' : 'false') . "');</script>";
+                                    // echo "<script>console.log('genba_id={$genbaId}, 現場: " . addslashes($row['genba_name']) . " → 存在: " . ($exists ? 'true' : 'false') . "');</script>";
 
                                     if ($exists) {
-                                        echo "<script>console.log('  → filteredData[{$genbaId}]:', " . json_encode($filteredData[$genbaId], JSON_UNESCAPED_UNICODE) . ");</script>";
-                                        echo "<script>console.log('  → ドロップダウンに追加: genba_id={$genbaId}, name=" . addslashes($row['genba_name']) . "');</script>";
+                                        // echo "<script>console.log('  → filteredData[{$genbaId}]:', " . json_encode($filteredData[$genbaId], JSON_UNESCAPED_UNICODE) . ");</script>";
+                                        // echo "<script>console.log('  → ドロップダウンに追加: genba_id={$genbaId}, name=" . addslashes($row['genba_name']) . "');</script>";
                                     }
                                 ?>
                                 <?php if ($exists): ?>
@@ -280,53 +281,13 @@ echo "<script>console.log('genba_masterから取得される現場は以下で�
                     if (!isInspected) {
                         // 未点検の場合のみクリックイベントリスナーを設定
                         button.addEventListener('click', (event) => {
-                            // ボタンクリック時の処理
                             event.preventDefault();
-                            const buttonElement = event.target; // Get the clicked button element
-                            const inspectionTypeIdFromButton = buttonElement.dataset.inspectionTypeId; // Retrieve data attribute
-                            const targetNameIdFromButton = buttonElement.dataset.targetNameId; // target_name_idも取得
-                            // デフォルトのイベント動作をキャンセル
-                            const currentDate = new Date().toISOString().split('T')[0];
-                            // 今日の日付をYYYY-MM-DD形式で取得
-
-                            fetch('check_car_item.php', {
-                                    // check_car_item.phpに非同期リクエストを送信
-                                    method: 'POST',
-                                    // POSTメソッドを使用
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        // リクエストヘッダーにJSON形式であることを指定
-                                    },
-                                    body: JSON.stringify({
-                                        date: currentDate,
-                                        genba: normalizedSelectedGenba,
-                                        item: item
-                                        // リクエストボディに日付、現場名、点検項目をJSON形式で設定
-                                    })
-                                })
-                                .then(response => response.json())
-                                // レスポンスをJSON形式で解析
-                                .then(result => {
-                                    // APIレスポンス処理
-                                    // console.log('API Response:', result);
-                                    // APIレスポンスをコンソールに出力
-                                    if (result.exists) {
-                                        // APIレスポンスで既に点検データが存在する場合
-                                        alert(`${currentDate}の${normalizedSelectedGenba}の${item}点検は既に登録されています。`);
-                                        // アラートメッセージを表示
-                                    } else {
-                                        // APIレスポンスで点検データが存在しない場合
-                                        displayInspectionForm(item, inspectionTypeIdFromButton, targetNameIdFromButton);
-                                        // 点検フォームを表示する関数を呼び出す（target_name_idも渡す）
-                                    }
-                                })
-                                .catch(error => {
-                                    // APIエラー時の処理
-                                    // console.error('API Error:', error);
-                                    // APIエラーをコンソールに出力
-                                    displayInspectionForm(item, inspectionTypeIdFromButton, targetNameIdFromButton);
-                                    // エラー時も点検フォームを表示する関数を呼び出す (エラー発生時でもフォームを表示させるため？)
-                                });
+                            const buttonElement = event.target;
+                            const inspectionTypeIdFromButton = buttonElement.dataset.inspectionTypeId;
+                            const targetNameIdFromButton = buttonElement.dataset.targetNameId;
+                            
+                            // smart_assignmentsで点検済みチェック済みのため、直接フォーム表示
+                            displayInspectionForm(item, inspectionTypeIdFromButton, targetNameIdFromButton);
                         });
                     }
 
