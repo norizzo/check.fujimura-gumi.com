@@ -33,55 +33,47 @@ function handleError($message) {
     // error_log($message, 3, "error.log");
 }
 //配車表のでーたを取得
-function getFilteredData($conn2) {
-    $sql = "SELECT name, top_y FROM sortable WHERE type_id=3 AND top_y < 827 AND left_x BETWEEN 1 AND 10 ORDER BY top_y ASC";
-    $result = $conn2->query($sql);
+//配車表のでーたを取得（smart_assignmentsテーブルから日付ベースで現場IDを取得）
+function getFilteredData($conn2, $date = null) {
+    // 日付が指定されていない場合は本日
+    if ($date === null) {
+        $date = date('Y-m-d');
+    }
 
-    $data = [];
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $data[] = $row;
-        }
-    } else {
-        echo "データが見つかりませんでした。";
-        return null; // or handle error appropriately
+    // smart_assignmentsから指定日付の現場オブジェクト（target_name_id=NULL, genba_id存在）を取得
+    $sql = "SELECT DISTINCT sa.genba_id, gm.genba_name
+            FROM smart_assignments sa
+            INNER JOIN genba_master gm ON sa.genba_id = gm.genba_id
+            WHERE sa.assignment_date = ?
+            AND sa.target_name_id IS NULL
+            AND sa.genba_id IS NOT NULL
+            ORDER BY sa.genba_id ASC";
+
+    $stmt = $conn2->prepare($sql);
+    $stmt->bind_param('s', $date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if (!$result) {
+        error_log("getFilteredData SQL error: " . $conn2->error);
+        return [];
     }
 
     $filteredData = [];
-    for ($i = 0; $i < count($data); $i++) {
-        if ($data[$i]['top_y'] >= 55 && $data[$i]['top_y'] <= 60) {
-            $startTopY = 54;
-        } else {
-            $startTopY = $data[$i]['top_y'] - 2;
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $genbaId = intval($row['genba_id']);
+            $genbaName = $row['genba_name'];
+
+            // genba_idをキーとして現場名を保存
+            $filteredData[$genbaId] = [
+                'genba_name' => $genbaName
+            ];
         }
-
-        if ($i + 1 < count($data)) {
-            $endTopY = $data[$i + 1]['top_y'] - 5;
-        } else {
-            $endTopY = $data[$i]['top_y'] + 140;
-        }
-
-      /*   // top_yとend_yをモニタ
-        var_dump($startTopY);
-        var_dump($endTopY); */
-
-
-        $keyName = mb_convert_kana(str_replace([" ", "\n", "\r", "\t"], "", $data[$i]['name']), "KV", "UTF-8");
-
-        $nameSql = "SELECT name FROM sortable WHERE top_y >= ? AND top_y < ? AND left_x BETWEEN 1 AND 1390 AND type_id != 3 AND type_id IN (5,12)";
-        $stmt = $conn2->prepare($nameSql);
-        $stmt->bind_param("ii", $startTopY, $endTopY);
-        $stmt->execute();
-        $nameResult = $stmt->get_result();
-
-        $nameArray = [];
-        while ($nameRow = $nameResult->fetch_assoc()) {
-            $nameArray[] = mb_convert_kana(str_replace([" ", "\n", "\r", "\t"], "",$nameRow['name']), "KV", "UTF-8");
-        }
-        $stmt->close();
-
-        $filteredData[$keyName] = $nameArray;
     }
+
+    $stmt->close();
     return $filteredData;
 }
 

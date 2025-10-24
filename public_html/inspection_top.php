@@ -8,14 +8,29 @@ error_reporting(E_ALL);
 error_log("Error details: " . print_r(error_get_last(), true)); */
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth_check.php';
-require_once 'config.php';
-require_once 'functions.php';
+require_once dirname(__DIR__) . '/private/config.php';
+require_once dirname(__DIR__) .  '/private/functions.php';
 
 $conn = connectDB();
 
-// 現場の取得
-$sql = "SELECT * FROM genba_master WHERE finished = 0 ORDER BY genba_name";
-$genbaResult = $conn->query($sql);
+// デフォルトは本日の日付
+$selected_date = date('Y-m-d');
+
+$filteredData = getFilteredData($conn, $selected_date);
+
+if ($filteredData === null) {
+    exit;
+}
+
+// JavaScriptに渡す前にJSONエンコード
+$filteredDataJson = json_encode($filteredData, JSON_UNESCAPED_UNICODE);
+//現場id取得
+$genbaSql = "SELECT genba_id, genba_name FROM genba_master WHERE finished = 0 ORDER BY genba_id ASC";
+$genbaResult = $conn->query($genbaSql);
+if (!$genbaResult) {
+    die("Genba query failed: (" . $conn->errno . ") " . $conn->error);
+}
+
 // 点検種類とカテゴリを取得
 $sql = "SELECT * FROM inspection_types WHERE category NOT IN ('重機・車両', '発電機') ORDER BY category";
 $result = $conn->query($sql);
@@ -86,18 +101,40 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
                 <div class="col-12">
                     <h2>点検</h2>
                 </div>
+                <!-- 日付選択 -->
+                <div class="col-1212 mb-3">
+                    <label for="dateSelect" class="form-label">日付を選択してください</label>
+                    <input type="date" id="dateSelect" class="form-control w-auto" value="<?php echo date('Y-m-d'); ?>" onchange="changeDate(this)">
+                </div>
 
                 <!-- 現場選択 -->
-                <div class="col-12 col-md-6 mb-3">
-                    <label for="genbaSelect" class="form-label">現場を選択:</label>
-                    <select class="form-select" id="genbaSelect" onchange="changeColorGenba(this)"">
-                        <option value="">現場を選択してください</option>
-                        <?php while ($genba = $genbaResult->fetch_assoc()): ?>
-                            <option value="<?= htmlspecialchars($genba['genba_id']) ?>">
-                                <?= htmlspecialchars($genba['genba_name']) ?>
-                            </option>
+                <div class="col-1212 mb-3">
+                    <label for="genbaSelect" class="form-label">現場名を選択してください</label>
+                    <select id="genbaSelect" name="genba_id" class="form-select w-auto" onchange="changeColorGenba(this)" required>
+                        <option value="" selected disabled><span style="color:red;">選択してください</span></option>
+                        <?php while ($row = $genbaResult->fetch_assoc()): ?>
+                            <?php
+                            $genbaId = intval($row['genba_id']);
+                            // genba_idベースで存在チェック
+                            $exists = isset($filteredData[$genbaId]);
+                            ?>
+                            <?php if ($exists): ?>
+                                <option value="<?php echo intval($row['genba_id']); ?>">
+                                    <?php echo htmlspecialchars($row['genba_name']); ?>
+                                </option>
+                            <?php endif; ?>
                         <?php endwhile; ?>
                     </select>
+
+                    <!-- <label for="genbaSelect" class="form-label">現場を選択:</label>
+                    <select class="form-select" id="genbaSelect" onchange="changeColorGenba(this)"">
+                        <option value="">現場を選択してください</option>
+                        <?php foreach ($filteredData as $genbaName => $genbaData): ?>
+                                    <option value="<?php echo htmlspecialchars($genbaData['genba_id']); ?>">
+                                        <?php echo htmlspecialchars($genbaName); ?>
+                                    </option>
+                        <?php endforeach; ?>
+                    </select> -->
                 </div>
             </div>
 
@@ -149,18 +186,54 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
     <script>
         let todayInspectedItems = <?php echo json_encode($todayInspectedItems); ?>;
         const historicalInspectedItems = <?php echo json_encode($historicalInspectedItems); ?>;
+        // PHPから渡された$filteredDataをJavaScriptで利用できるようにする
+        const filteredData = <?php echo $filteredDataJson; ?>;
+
+        // コンソールに$filteredDataの中身を表示
+        console.log('filteredData:', filteredData);
+        // 日付変更時に現場リストを更新
+        function changeDate(dateInput) {
+            const selectedDate = dateInput.value;
+
+            fetch(`get_genba_list.php?date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const genbaSelect = document.getElementById('genbaSelect');
+                    // 既存のオプションをクリア（最初のプレースホルダー以外）
+                    genbaSelect.innerHTML = '<option value="" selected disabled><span style="color:red;">選択してください</span></option>';
+
+                    // 新しい現場リストを追加
+                    data.forEach(genba => {
+                        const option = document.createElement('option');
+                        option.value = genba.genba_id;
+                        option.textContent = genba.genba_name;
+                        genbaSelect.appendChild(option);
+                    });
+
+                    // ボタンの状態をリセット
+                    document.querySelectorAll('.open-modal-button').forEach(button => {
+                        button.classList.remove('btn-inspected', 'btn-historical', 'btn-new');
+                        button.disabled = false;
+                    });
+                })
+                .catch(error => {
+                    console.error('現場リストの取得に失敗しました:', error);
+                });
+        }
 
         document.getElementById('genbaSelect').addEventListener('change', updateButtons);
 
         function updateButtons() {
             const selectedGenbaId = document.getElementById('genbaSelect').value;
+            console.log(selectedGenbaId);
             // 現場が選択されていない場合、処理をスキップ
             if (!selectedGenbaId) {
                 return;
             }
 
             // 選択された現場IDと日付を元に、get_inspection_status.phpから点検状況を取得
-            fetch(`get_inspection_status.php?genba_id=${selectedGenbaId}&date=<?php echo $today; ?>`)
+            const selectedDate = document.getElementById('dateSelect').value;
+            fetch(`get_inspection_status.php?genba_id=${selectedGenbaId}&date=${selectedDate}`)
                 .then(response => response.json())
                 .then(data => {
                     // console.log('取得したデータ:', data);
@@ -241,11 +314,9 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
             console.error('iframe loading error');
         };
 
-        
+
         updateButtons(); // 初期表示時のボタン状態更新
     </script>
     <script src="./js/common.js"></script>
 
 </html>
-
-<?php closeDB($conn); ?>
