@@ -42,13 +42,13 @@ if ($result->num_rows > 0) {
         $categories[$row['category']][] = $row;
     }
 }
-// 本日の点検履歴を取得
-$today = date('Y-m-d');
+// 選択された日付の点検履歴を取得（URLパラメータまたは本日）
+$selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $sql = "SELECT DISTINCT i.inspection_type_id, i.genba_id 
         FROM inspections i 
         WHERE DATE(i.date) = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('s', $today);
+$stmt->bind_param('s', $selected_date);
 $stmt->execute();
 $todayInspectionResult = $stmt->get_result();
 
@@ -58,12 +58,12 @@ $sql = "SELECT DISTINCT inspection_type_id, genba_id
 $allInspectionResult = $conn->query($sql);
 
 // 点検履歴を配列に格納
-$todayInspectedItems = [];
+$selectedDateInspectedItems = [];  // 選択された日付の点検済みアイテム
 $historicalInspectedItems = [];
 
 while ($row = $todayInspectionResult->fetch_assoc()) {
     $key = $row['genba_id'] . '-' . $row['inspection_type_id'];
-    $todayInspectedItems[$key] = true;
+    $selectedDateInspectedItems[$key] = true;
 }
 
 while ($row = $allInspectionResult->fetch_assoc()) {
@@ -72,7 +72,7 @@ while ($row = $allInspectionResult->fetch_assoc()) {
 }
 
 // JavaScript用にデータを準備
-$todayInspectedItemsJson = json_encode($todayInspectedItems);
+$selectedDateInspectedItemsJson = json_encode($selectedDateInspectedItems);
 $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
 ?>
 
@@ -184,7 +184,8 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let todayInspectedItems = <?php echo json_encode($todayInspectedItems); ?>;
+        // 選択された日付の点検済みアイテム（初期値：PHP側で取得）
+        let selectedDateInspectedItems = <?php echo json_encode($selectedDateInspectedItems); ?>;
         const historicalInspectedItems = <?php echo json_encode($historicalInspectedItems); ?>;
         // PHPから渡された$filteredDataをJavaScriptで利用できるようにする
         const filteredData = <?php echo $filteredDataJson; ?>;
@@ -237,8 +238,8 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
                 .then(response => response.json())
                 .then(data => {
                     // console.log('取得したデータ:', data);
-                    // todayInspectedItems を取得したデータで更新
-                    todayInspectedItems = data;
+                    // selectedDateInspectedItems を取得したデータで更新
+                    selectedDateInspectedItems = data;
                     // 全ての .open-modal-button 要素に対して処理を行う
                     document.querySelectorAll('.open-modal-button').forEach(button => {
                         const inspectionId = button.getAttribute('data-inspection-id');
@@ -248,8 +249,8 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
                         button.classList.remove('btn-inspected', 'btn-historical', 'btn-new');
                         button.disabled = false;
 
-                        // 本日点検済みの場合
-                        if (todayInspectedItems[key]) {
+                        // 選択された日付で点検済みの場合
+                        if (selectedDateInspectedItems[key]) {
                             button.classList.add('btn-inspected');
                             button.disabled = true;
                             // 過去に点検済みの場合
@@ -278,8 +279,8 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
                 const selectedGenbaName = document.getElementById('genbaSelect').options[document.getElementById('genbaSelect').selectedIndex].text;
 
                 const key = `${selectedGenbaId}-${inspectionId}`;
-                if (todayInspectedItems[key]) {
-                    alert('本日の点検は既に完了しています。');
+                if (selectedDateInspectedItems[key]) {
+                    alert('選択された日付の点検は既に完了しています。');
                     return;
                 }
 
