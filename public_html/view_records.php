@@ -4,9 +4,6 @@ if (ob_get_level()) ob_end_flush();
 // 必要なファイルを読み込む
 // auth.phpやauth_check.phpを共通で読み込む
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth_check.php';
-require_once 'config.php'; // DB接続ファイル
-require_once 'functions.php'; // sanitizeInput 関数など
-
 
 
 // データベースに接続
@@ -23,7 +20,7 @@ $filter_applied = !empty($genba_id) && !empty($inspection_type_id) && !empty($mo
 
 
 // 現場名のドロップダウンを取得
-$genba_sql = "SELECT genba_id, genba_name FROM genba_master ORDER BY genba_id ASC";
+$genba_sql = "SELECT genba_id, genba_name FROM genba_master WHERE finished = 0 ORDER BY genba_id ASC";
 $genba_result = $conn->query($genba_sql);
 if (!$genba_result) {
     die("現場名の取得に失敗しました: (" . $conn->errno . ") " . $conn->error);
@@ -241,6 +238,7 @@ if ($filter_applied) {
     $stmt->close();
 }
 // var_dump($inspection_id_map);
+// var_dump($inspection_types);
 ?>
 
 <!DOCTYPE html>
@@ -352,11 +350,20 @@ if ($filter_applied) {
                         <label for="genba_id">現場名</label>
                         <select id="genba_id" name="genba_id" class="form-select" required>
                             <option value="" disabled <?php echo empty($genba_id) ? 'selected' : ''; ?>>選択してください</option>
-                            <?php while ($row = $genba_result->fetch_assoc()) { ?>
-                                <option value="<?php echo intval($row['genba_id']); ?>" <?php echo ($row['genba_id'] == $genba_id) ? 'selected' : ''; ?>>
-                                    <?php echo sanitizeInput($row['genba_name']); ?>
-                                </option>
-                            <?php } ?>
+                            <?php
+                            // 現場名のドロップダウンリストを逆順に表示
+                            $genba_sql = "SELECT genba_id, genba_name FROM genba_master WHERE finished = 0 ORDER BY genba_id ASC";
+                            $genba_result = $conn->query($genba_sql);
+
+                            $genba_options = array();
+                            while ($row = $genba_result->fetch_assoc()) {
+                                $genba_options[] = '<option value="' . intval($row['genba_id']) . '" ' . ($row['genba_id'] == $genba_id ? 'selected' : '') . '>' . sanitizeInput($row['genba_name']) . '</option>';
+                            }
+                            $genba_options = array_reverse($genba_options);
+                            foreach ($genba_options as $option) {
+                                echo $option;
+                            }
+                            ?>
                         </select>
                     </div>
                     <!-- 点検種類ドロップダウン -->
@@ -563,7 +570,7 @@ if ($filter_applied) {
                             $inspection_item_names = [];
                             if ($filter_applied) {
                                 // 点検項目をSQLから取得
-                                $items_sql = "SELECT DISTINCT inspection_item_name, date FROM inspections WHERE inspection_type_id = ? AND genba_id = ? AND DATE_FORMAT(date, '%Y-%m') = ?";
+                                $items_sql = "SELECT DISTINCT inspection_item_name, date FROM inspections WHERE inspection_type_id = ? AND genba_id = ? AND DATE_FORMAT(date, '%Y-%m') = ? ORDER BY inspection_item_name ASC";
                                 $stmt = $conn->prepare($items_sql);
                                 $stmt->bind_param("iis", $inspection_type_id, $genba_id, $month); // パラメータに現場IDを追加
                                 $stmt->execute();
@@ -579,7 +586,7 @@ if ($filter_applied) {
 
                             // 点検項目ごとのデータ生成
                             $item_rows = '';
-                            if ($inspection_type_id == 18 || $inspection_type_id == 30) {
+                            if ($inspection_type_id == 18 || $inspection_type_id == 19 || $inspection_type_id == 10) {
                                 // $inspection_item_names: 点検項目名と、その点検が行われた日(日付の配列)の連想配列
                                 foreach ($inspection_item_names as $item_name => $days) {
                                     // 各点検項目の行HTMLを生成
