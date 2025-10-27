@@ -4,9 +4,9 @@
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-require_once 'config.php';
-require_once 'functions.php';
-require_once 'auth_check.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/auth_check.php';
+require_once dirname(__DIR__) . '/private/config.php';
+require_once dirname(__DIR__) .  '/private/functions.php';
 
 // データベースに接続
 $conn = connectDB();

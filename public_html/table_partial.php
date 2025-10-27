@@ -25,9 +25,30 @@
                         編集
                     </button>
                 </td>
-                <?php foreach ($row as $value): ?>
-                    <td><?= htmlspecialchars($value) ?></td>
-                <?php endforeach; ?>
+                <?php
+                    $fieldIndex = 0;
+                    foreach ($row as $key => $value):
+                        $fieldName = $fields[$fieldIndex]->name;
+                ?>
+                    <td>
+                        <?php if (($selectedTable === 'genba_master' && $fieldName === 'finished') || (($selectedTable === 'checker_master' || $selectedTable === 'target_name') && $fieldName === 'hidden')): ?>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       role="switch"
+                                       id="toggleSwitch<?= htmlspecialchars(reset($row)) ?>"
+                                       data-record-id="<?= htmlspecialchars(reset($row)) ?>"
+                                       onchange="toggleFinished(this)"
+                                    <?= intval($value) === 0 ? 'checked' : '' ?>
+                                >
+                            </div>
+                        <?php else: ?>
+                            <?= htmlspecialchars($value) ?>
+                        <?php endif; ?>
+                    </td>
+                <?php
+                        $fieldIndex++;
+                    endforeach; ?>
             </tr>
         <?php endwhile; ?>
     </tbody>

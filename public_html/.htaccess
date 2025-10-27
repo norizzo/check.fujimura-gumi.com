@@ -3,7 +3,8 @@ RewriteEngine On
 
 # PHPファイルの拡張子を省略（example.com/index.php → example.com/index）
 RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^([^/]+)/?$ $1.php [L]
+RewriteRule ^([^/]+)/?$ $1.php [QSA,L]
+
 
 # index.php へリダイレクト（ルートアクセス時）
 DirectoryIndex index.php

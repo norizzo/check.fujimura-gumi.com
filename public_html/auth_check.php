@@ -1,8 +1,11 @@
 <?php
 // auth_check.php
+/* phpinfo(); */
+@require_once dirname(__DIR__) . '/private/jwt.php';
+require_once dirname(__DIR__) . '/private/key.php';
+require_once dirname(__DIR__) . '/private/config.php';
+require_once dirname(__DIR__) .  '/private/functions.php';
 
-require_once 'jwt.php';
-require_once 'key.php';
 session_start();
 
 if (!isset($_SESSION['jwt'])) {

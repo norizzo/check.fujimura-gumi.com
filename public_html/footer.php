@@ -1,6 +1,4 @@
-<!-- Bootstrap CSSリンク -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Font Awesomeアイコンを使用するためのリンク -->
+<!-- Font Awesomeアイコン -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <!-- フッターメニュー -->
@@ -33,7 +31,7 @@
                 </a>
             </div>
             <?php
-            $allowed_users = ['田中 利憲', '本山 塁', '杉本 義夫', '小島 聡明', '小山 哲郎', '藤村 英明'];
+            $allowed_users = ['田中 利憲', '本山 塁', '杉本 義夫', '小島 聡明', '小山 哲郎', '藤村 英明, 若月 士竜'];
             if (isset($_SESSION['display_name']) && in_array($_SESSION['display_name'], $allowed_users)): ?>
             <div class="col text-center">
                 <a href="master_edit.php" class="text-muted">

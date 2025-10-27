@@ -10,8 +10,8 @@
  *   JSON形式の配列。キーは "genba_id-inspection_type_id" の形式で、値は true (点検済み) または false (未点検)。
  */
 
-require_once 'config.php';
-require_once 'functions.php';
+ require_once dirname(__DIR__) . '/private/config.php';
+ require_once dirname(__DIR__) .  '/private/functions.php';
 
 // データベース接続
 $conn = connectDB();

@@ -1,7 +1,7 @@
 <?php
 if ($_SERVER['SERVER_ADDR'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1' || $_SERVER['SERVER_ADDR'] === '::1') {
     $host = 'localhost';
-    $db = 'user';
+    $db = '試作2';
     $user = 'root';
     $pass = '';
     $charset = 'utf8mb4';
@@ -16,7 +16,7 @@ if ($_SERVER['SERVER_ADDR'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.
     $host = 'localhost';
     $db = 'fujimura_check';
     $user = 'fujimura_check';
-    $pass = 'check2400';
+    $pass = 'Staff2400';
     $charset = 'utf8mb4';
 
     $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

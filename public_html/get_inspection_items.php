@@ -1,7 +1,7 @@
 <?php
 // データベース接続
-require_once 'config.php';
-require_once 'function.php';
+require_once dirname(__DIR__) . '/private/config.php'; // config.php のパスを調整
+require_once dirname(__DIR__) . '/private/functions.php'; // functions.php のパスを調整
 
 $inspection_type_id = $_GET['inspection_type_id'] ?? null;
 $item_name = $_GET['item_name'] ?? null;

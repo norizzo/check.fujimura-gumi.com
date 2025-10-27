@@ -2,9 +2,9 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-require_once 'db_connection.php';
-require_once 'jwt.php';
-require_once 'key.php'; // JWT_SECRET_KEY を読み込む
+require_once dirname(__DIR__) . '/private/db_connection.php';
+require_once dirname(__DIR__) . '/private/jwt.php';
+require_once dirname(__DIR__) . '/private/key.php';
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
