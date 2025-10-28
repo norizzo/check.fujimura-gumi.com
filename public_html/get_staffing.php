@@ -149,17 +149,17 @@ if (!$itemsResult) {
                             <option value="" selected disabled><span style="color:red;">選択してください</span></option>
                             <?php while ($row = $genbaResult->fetch_assoc()): ?>
                                 <?php
-                                    // genba_idベースで存在チェック
-                                    $genbaId = intval($row['genba_id']);
-                                    $exists = isset($filteredData[$genbaId]);
+                                // genba_idベースで存在チェック
+                                $genbaId = intval($row['genba_id']);
+                                $exists = isset($filteredData[$genbaId]);
 
-                                    // デバッグ出力を追加
-                                    // echo "<script>console.log('genba_id={$genbaId}, 現場: " . addslashes($row['genba_name']) . " → 存在: " . ($exists ? 'true' : 'false') . "');</script>";
+                                // デバッグ出力を追加
+                                // echo "<script>console.log('genba_id={$genbaId}, 現場: " . addslashes($row['genba_name']) . " → 存在: " . ($exists ? 'true' : 'false') . "');</script>";
 
-                                    if ($exists) {
-                                        // echo "<script>console.log('  → filteredData[{$genbaId}]:', " . json_encode($filteredData[$genbaId], JSON_UNESCAPED_UNICODE) . ");</script>";
-                                        // echo "<script>console.log('  → ドロップダウンに追加: genba_id={$genbaId}, name=" . addslashes($row['genba_name']) . "');</script>";
-                                    }
+                                if ($exists) {
+                                    // echo "<script>console.log('  → filteredData[{$genbaId}]:', " . json_encode($filteredData[$genbaId], JSON_UNESCAPED_UNICODE) . ");</script>";
+                                    // echo "<script>console.log('  → ドロップダウンに追加: genba_id={$genbaId}, name=" . addslashes($row['genba_name']) . "');</script>";
+                                }
                                 ?>
                                 <?php if ($exists): ?>
                                     <option value="<?php echo $genbaId; ?>" <?php echo ($selected_genba_id !== null && $genbaId === $selected_genba_id) ? 'selected' : ''; ?>>
@@ -227,8 +227,8 @@ if (!$itemsResult) {
             if (genbaData && genbaData.machines) {
                 genbaData.machines.forEach(machineObj => {
                     // 選択された現場の点検項目データ配列をループ処理
-                    const item = machineObj.name;  // 重機名
-                    const targetNameId = machineObj.target_name_id;  // target_name_id
+                    const item = machineObj.name; // 重機名
+                    const targetNameId = machineObj.target_name_id; // target_name_id
 
                     const button = document.createElement('button');
                     // ボタン要素を生成
@@ -285,7 +285,7 @@ if (!$itemsResult) {
                             const buttonElement = event.target;
                             const inspectionTypeIdFromButton = buttonElement.dataset.inspectionTypeId;
                             const targetNameIdFromButton = buttonElement.dataset.targetNameId;
-                            
+
                             // smart_assignmentsで点検済みチェック済みのため、直接フォーム表示
                             displayInspectionForm(item, inspectionTypeIdFromButton, targetNameIdFromButton);
                         });
@@ -308,7 +308,7 @@ if (!$itemsResult) {
             // console.log('Other button added');
         });
 
-        
+
         // 新しいフォーム表示関数 (AJAX使用)
         function sanitizeInput(str) {
             const tempElement = document.createElement('div');
@@ -452,8 +452,8 @@ if (!$itemsResult) {
                 // console.log('inspectionTypeId は URL パラメータにありません');
             }
 
-             // URLパラメータから checkerId を取得し、存在すれば点検者セレクトボックスの値を設定
-             if (checkerId) {
+            // URLパラメータから checkerId を取得し、存在すれば点検者セレクトボックスの値を設定
+            if (checkerId) {
                 // console.log('checkerId が存在します:', checkerId);
                 const checkerSelect = document.getElementById('checker');
                 // console.log('checkerSelect 要素:', checkerSelect);
@@ -495,6 +495,54 @@ if (!$itemsResult) {
             // フォームが送信される
             return true;
         }
+        // 📡 ポーリング: 配置データ更新チェック（10秒間隔）
+        let lastUpdateTime = null;
+        // let currentGenbaId = null;
+        let currentDate = '<?php echo $date; ?>';
+        let pollingInterval = null;
+
+        // ページ読み込み時に即座にポーリング開始
+        console.log('📡 ページ読み込み時ポーリング開始: date=' + currentDate);
+        checkDataUpdate(); // 初回チェック
+        pollingInterval = setInterval(checkDataUpdate, 10000); // 10秒ごと
+
+        
+
+        function checkDataUpdate() {
+
+
+            fetch('check_data_update.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'date=' + encodeURIComponent(currentDate)
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.success) {
+                        if (lastUpdateTime && response.last_update !== lastUpdateTime) {
+                            // データが更新された
+                            console.log('⚠️ 配置データ更新検知: ' + lastUpdateTime + ' → ' + response.last_update);
+
+                            alert('配置データが更新されました。ページを再読み込みします。');
+                            location.reload();
+                        }
+                        lastUpdateTime = response.last_update;
+                        console.log('✅ データチェック完了: ' + response.last_update + ' (' + response.count + '件)');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ ポーリングエラー:', error);
+                });
+        }
+
+        // ページ離脱時にポーリング停止
+        window.addEventListener('beforeunload', function() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        });
     </script>
 
     <script src="./js/common.js"></script>
