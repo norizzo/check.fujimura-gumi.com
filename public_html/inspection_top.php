@@ -285,7 +285,8 @@ $historicalInspectedItemsJson = json_encode($historicalInspectedItems);
                 }
 
                 const iframe = document.getElementById('inspectionFormFrame');
-                const url = `inspection_m_form.php?inspection_type=${inspectionId}&genba_id=${selectedGenbaId}&genba_name=${encodeURIComponent(selectedGenbaName)}`;
+                const selectedDate = document.getElementById('dateSelect').value; // 前画面の選択日付を取得
+                const url = `inspection_m_form.php?inspection_type=${inspectionId}&genba_id=${selectedGenbaId}&genba_name=${encodeURIComponent(selectedGenbaName)}&date=${selectedDate}`;
                 console.log('Generated URL:', url); // URLをコンソールに出力
                 iframe.src = url;
 

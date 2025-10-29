@@ -132,8 +132,9 @@ function getInspectionItems($conn, $inspection_type)
             <input type="hidden" name="inspection_type_id" value="<?php echo $inspection_type; ?>">
             <div class="col-md-4 mb-2">
                 <label for="date" class="form-label">点検日</label>
+                <!-- 前画面から日付を引き継ぎ、変更不可 -->
 
-                <input type="date" id="date" name="date" class="form-control" value="<?php echo htmlspecialchars($inspection_date); ?>" required>
+                <input type="date" id="date" name="date" class="form-control" value="<?php echo htmlspecialchars($inspection_date); ?>" readonly required>
             </div>
             <div class="col-md-4 mb-2">
                 <label for="checker" class="form-label">点検者</label>
