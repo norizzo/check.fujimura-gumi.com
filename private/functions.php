@@ -86,7 +86,7 @@ function getAssignmentsForInspection($conn, $date = null) {
 
     $sql = "SELECT
                 gm.genba_name,
-                tn.short_name as machine_name,
+                tn.name as machine_name,
                 sa.assignment_id,
                 sa.genba_id,
                 sa.target_name_id
@@ -96,7 +96,7 @@ function getAssignmentsForInspection($conn, $date = null) {
             WHERE sa.assignment_date = ?
             AND sa.assignment_status = 'active'
             AND tn.ob_type IN (5, 12)
-            ORDER BY gm.genba_id, tn.short_name";
+            ORDER BY gm.genba_id, tn.name";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $date);
@@ -108,7 +108,7 @@ function getAssignmentsForInspection($conn, $date = null) {
     $filteredData = [];
     while ($row = $result->fetch_assoc()) {
         $genbaId = $row['genba_id'];
-        $machineName = mb_convert_kana(str_replace([" ", "\n", "\r", "\t"], "", $row['machine_name']), "KV", "UTF-8");
+        $machineName = $row['machine_name'];
         $targetNameId = $row['target_name_id'];
 
         // genba_idをキーとして使用

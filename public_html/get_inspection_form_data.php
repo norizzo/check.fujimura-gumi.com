@@ -26,7 +26,7 @@ $targetsResult = $targetsStmt->get_result();
 
 $targets = [];
 while ($row = $targetsResult->fetch_assoc()) {
-    $targets[] = ['name' => $row['name']]; // 'name' はテーブルのカラム名に合わせてください
+    $targets[] = ['name' => $row['name']];
 }
 $targetsStmt->close();
 

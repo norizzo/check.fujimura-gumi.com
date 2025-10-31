@@ -65,6 +65,11 @@ if (
             $data = [];
             foreach ($_POST as $key => $value) {
                 if ($key !== 'table' && $key !== $primaryKey && $key !== 'action') { // 'action' を除外
+                    // target_nameテーブルのnameフィールドの場合、自動変換を適用
+                    if ($table === 'target_name' && $key === 'name') {
+                        // 英数字を半角、日本語（カナ）を全角に統一
+                        $value = mb_convert_kana($value, 'asKV', 'UTF-8');
+                    }
                     $data[$key] = $value;
                 }
             }
